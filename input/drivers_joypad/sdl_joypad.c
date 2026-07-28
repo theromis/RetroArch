@@ -81,7 +81,14 @@ static uint8_t sdl_pad_get_hat(sdl_joypad_t *pad, unsigned hat)
 {
 #ifdef HAVE_SDL2
    if (pad->controller)
-      return sdl_pad_get_button(pad, hat);
+   {
+      /* Stock code called get_button(hat) here, which is wrong for a hat
+       * index. Read the real joystick hat so h0* autoconfigs work (webOS
+       * Switch Pro reports the D-pad as hat 0). */
+      if (hat != 0 || !pad->joypad || SDL_JoystickNumHats(pad->joypad) <= 0)
+         return 0;
+      return SDL_JoystickGetHat(pad->joypad, 0);
+   }
 #endif
    return SDL_JoystickGetHat(pad->joypad, hat);
 }
